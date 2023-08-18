@@ -1,0 +1,1 @@
+/usr/bin/g++ -fPIC -g -shared -Wl,-soname,libjsensors.so -o libjsensors.so CMakeFiles/jsensors.dir/src/jni_sensor.cpp.o CMakeFiles/jsensors.dir/src/jni_sensor_monitor.cpp.o  -lsensors 

@@ -1,0 +1,68 @@
+[
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -Dsensemon_EXPORTS -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -fPIC -lgraalvm-llvm -shared -o CMakeFiles/sensemon.dir/src/device.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device.cpp",
+  "output": "CMakeFiles/sensemon.dir/src/device.cpp.o"
+},
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -Dsensemon_EXPORTS -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -fPIC -lgraalvm-llvm -shared -o CMakeFiles/sensemon.dir/src/device_feature.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device_feature.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device_feature.cpp",
+  "output": "CMakeFiles/sensemon.dir/src/device_feature.cpp.o"
+},
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -Dsensemon_EXPORTS -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -fPIC -lgraalvm-llvm -shared -o CMakeFiles/sensemon.dir/src/device_subfeature.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device_subfeature.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device_subfeature.cpp",
+  "output": "CMakeFiles/sensemon.dir/src/device_subfeature.cpp.o"
+},
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -Dsensemon_EXPORTS -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -fPIC -lgraalvm-llvm -shared -o CMakeFiles/sensemon.dir/src/monitor.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/src/monitor.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/src/monitor.cpp",
+  "output": "CMakeFiles/sensemon.dir/src/monitor.cpp.o"
+},
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -Dsensemon_EXPORTS -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -fPIC -lgraalvm-llvm -shared -o CMakeFiles/sensemon.dir/src/sensemon.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/src/sensemon.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/src/sensemon.cpp",
+  "output": "CMakeFiles/sensemon.dir/src/sensemon.cpp.o"
+},
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -o CMakeFiles/sensemon_test.dir/src/device.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device.cpp",
+  "output": "CMakeFiles/sensemon_test.dir/src/device.cpp.o"
+},
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -o CMakeFiles/sensemon_test.dir/src/device_feature.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device_feature.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device_feature.cpp",
+  "output": "CMakeFiles/sensemon_test.dir/src/device_feature.cpp.o"
+},
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -o CMakeFiles/sensemon_test.dir/src/device_subfeature.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device_subfeature.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/src/device_subfeature.cpp",
+  "output": "CMakeFiles/sensemon_test.dir/src/device_subfeature.cpp.o"
+},
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -o CMakeFiles/sensemon_test.dir/src/monitor.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/src/monitor.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/src/monitor.cpp",
+  "output": "CMakeFiles/sensemon_test.dir/src/monitor.cpp.o"
+},
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -o CMakeFiles/sensemon_test.dir/src/sensemon.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/src/sensemon.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/src/sensemon.cpp",
+  "output": "CMakeFiles/sensemon_test.dir/src/sensemon.cpp.o"
+},
+{
+  "directory": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/build",
+  "command": "/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -DGRAALVM_COMPILER -I/home/jhuerfano/git/endava/graalvm/sensor-monitor/include -I/usr/lib/jvm/java-17-graalvm/languages/llvm/include -g -std=gnu++11 -o CMakeFiles/sensemon_test.dir/test/sensemon_test.cpp.o -c /home/jhuerfano/git/endava/graalvm/sensor-monitor/test/sensemon_test.cpp",
+  "file": "/home/jhuerfano/git/endava/graalvm/sensor-monitor/test/sensemon_test.cpp",
+  "output": "CMakeFiles/sensemon_test.dir/test/sensemon_test.cpp.o"
+}
+]

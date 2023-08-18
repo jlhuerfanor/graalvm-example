@@ -1,0 +1,1 @@
+/usr/lib/jvm/java-17-graalvm/languages/llvm/native/bin/clang++ -fPIC -g -shared -Wl,-soname,libsensemon.so -o libsensemon.so CMakeFiles/sensemon.dir/src/device.cpp.o CMakeFiles/sensemon.dir/src/device_feature.cpp.o CMakeFiles/sensemon.dir/src/device_subfeature.cpp.o CMakeFiles/sensemon.dir/src/monitor.cpp.o CMakeFiles/sensemon.dir/src/sensemon.cpp.o  -lsensors 
