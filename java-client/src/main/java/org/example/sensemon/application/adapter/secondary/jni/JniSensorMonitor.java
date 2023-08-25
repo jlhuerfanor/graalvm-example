@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(JniSensorMonitor.class);
@@ -22,8 +24,12 @@ public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
     private static native void sensorsCleanup();
     private static native DeviceInfo[] getChipNames();
     private static native FeatureInfo[] getChipFeatures(DeviceInfo deviceInfo);
+    private static native SubFeatureInfo[] getChipSubFeatures(FeatureInfo featureInfo);
+    private static native double getSubFeatureValue(SubFeatureInfo subFeatureInfo);
 
     private List<DeviceInfo> sensors;
+    private final Map<String, List<FeatureInfo>> featureInfoMap = new ConcurrentHashMap<>();
+    private final Map<FeatureKey, List<SubFeatureInfo>> subfeatureInfoMap = new ConcurrentHashMap<>();
 
     public JniSensorMonitor() throws IOException {
         sensorsReady = sensorsReady || sensorsInit();
@@ -46,22 +52,49 @@ public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
 
     @Override
     public List<FeatureInfo> getFeatures(DeviceInfo device) {
-        return null;
+        return featureInfoMap.computeIfAbsent(device.getName(), (unused) -> Optional.of(device)
+                .map(JniSensorMonitor::getChipFeatures)
+                .map(Arrays::stream)
+                .map(Stream::toList)
+                .orElse(null));
     }
 
     @Override
     public List<SubFeatureInfo> getSubFeatures(FeatureInfo feature) {
-        return null;
+        var key = new FeatureKey(feature.getDeviceInfo().getName(), feature.getNumber());
+
+        return subfeatureInfoMap.computeIfAbsent(key, (unused) -> Optional.of(feature)
+                .map(JniSensorMonitor::getChipSubFeatures)
+                .map(Arrays::stream)
+                .map(Stream::toList)
+                .orElse(null));
     }
 
     @Override
     public SensorData getValue(SubFeatureInfo subFeature) {
-        return null;
+        double value = getSubFeatureValue(subFeature);
+
+        return SensorData.builder()
+                .failed(Double.isNaN(value))
+                .value(value)
+                .build();
     }
 
     @Override
     public void close() {
         sensorsCleanup();
         log.info("Sensors cleaned up");
+    }
+
+    private record FeatureKey(String deviceName, int featureNumber) implements Comparable<FeatureKey> {
+        @Override
+        public int compareTo(FeatureKey other) {
+            var comparator = Comparator.<String>naturalOrder();
+            var deviceNameComparison = comparator.compare(deviceName, other.deviceName);
+
+            return deviceNameComparison == 0
+                    ? Integer.compare(featureNumber, other.featureNumber)
+                    : deviceNameComparison;
+        }
     }
 }

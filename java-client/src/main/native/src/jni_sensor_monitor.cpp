@@ -1,7 +1,8 @@
-#include "../include/org_example_sensemon_application_adapter_secondary_jni_JniSensorMonitor.h"
+#include "../native-include/org_example_sensemon_application_adapter_secondary_jni_JniSensorMonitor.h"
 
 #include "jni_sensor.h"
 #include <cstring>
+#include "jni_domain.h"
 
 
 #ifdef __cplusplus
@@ -26,6 +27,16 @@ JNIEXPORT jobjectArray JNICALL Java_org_example_sensemon_application_adapter_sec
 JNIEXPORT jobjectArray JNICALL Java_org_example_sensemon_application_adapter_secondary_jni_JniSensorMonitor_getChipFeatures
   (JNIEnv * env, jclass cls, jobject device_info) {
     return jsensors::create_device_feature_infos(env, device_info);
+}
+
+JNIEXPORT jobjectArray JNICALL Java_org_example_sensemon_application_adapter_secondary_jni_JniSensorMonitor_getChipSubFeatures
+  (JNIEnv * env, jclass cls, jobject feature_info) {
+    return jsensors::create_device_sub_feature_infos(env, feature_info);
+}
+
+JNIEXPORT jdouble JNICALL Java_org_example_sensemon_application_adapter_secondary_jni_JniSensorMonitor_getSubFeatureValue
+  (JNIEnv * env, jclass cls, jobject sub_feature_info) {
+    return jsensors::get_sub_feature_value(env, sub_feature_info);
 }
 
 #ifdef __cplusplus

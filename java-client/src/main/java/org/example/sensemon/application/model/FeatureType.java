@@ -29,6 +29,10 @@ public enum FeatureType {
     ;
     private final int code;
 
-    private static final Map<Integer, BusType> byCode = Arrays.stream(BusType.values())
-            .collect(Collectors.toMap(BusType::getCode, UnaryOperator.identity()));
+    private static final Map<Integer, FeatureType> byCode = Arrays.stream(FeatureType.values())
+            .collect(Collectors.toMap(FeatureType::getCode, UnaryOperator.identity()));
+
+    public static FeatureType fromCode(int code) {
+        return byCode.getOrDefault(code, UNKNOWN);
+    }
 }

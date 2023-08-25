@@ -13,4 +13,10 @@ public class FeatureInfo {
     private FeatureType featureType;
 
     private DeviceInfo deviceInfo;
+
+    @Override
+    public String toString() {
+        return "FeatureInfo { name = '%s', number = '%s', featureType = '%s' }".formatted(
+                name, number, featureType);
+    }
 }

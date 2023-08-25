@@ -4,6 +4,11 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum SubFeatureType {
@@ -96,4 +101,11 @@ public enum SubFeatureType {
     UNKNOWN(Integer.MAX_VALUE)
     ;
     private final int code;
+
+    private static final Map<Integer, SubFeatureType> byCode = Arrays.stream(SubFeatureType.values())
+            .collect(Collectors.toMap(SubFeatureType::getCode, UnaryOperator.identity()));
+
+    public static SubFeatureType fromCode(int code) {
+        return byCode.getOrDefault(code, UNKNOWN);
+    }
 }

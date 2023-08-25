@@ -147,7 +147,7 @@
                         <configuration>
                             <filesets>
                                 <fileset>
-                                    <directory>${project.basedir}/src/main/native/include</directory>
+                                    <directory>${project.basedir}/src/main/native/native-include</directory>
                                 </fileset>
                             </filesets>
                         </configuration>
@@ -159,7 +159,7 @@
                             <forceJavacCompilerUse>true</forceJavacCompilerUse>
                             <compilerArgs>
                                 <arg>-h</arg>
-                                <arg>${project.basedir}/src/main/native/include</arg>
+                                <arg>${project.basedir}/src/main/native/native-include</arg>
                             </compilerArgs>
                         </configuration>
                     </plugin>

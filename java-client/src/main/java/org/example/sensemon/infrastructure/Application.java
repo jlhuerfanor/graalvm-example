@@ -11,12 +11,30 @@ import java.util.stream.Collectors;
 public class Application {
     public static void main(String[] args) {
         try(var m = new JniSensorMonitor()) {
-            var list = m.getDevices();
+            var devices = m.getDevices();
 
-            System.out.printf("Devices: %n%s%n", list.stream()
-                    .map(Objects::toString)
-                    .collect(Collectors.joining(System.lineSeparator()))
-            );
+            for (var device : devices) {
+                var features = m.getFeatures(device);
+
+                System.out.printf("%s%n", device);
+
+                if(Objects.nonNull(features)) {
+                    for (var feature : features) {
+                        var subfeatures = m.getSubFeatures(feature);
+
+                        System.out.printf("\t%s%n", feature);
+
+                        if(Objects.nonNull(subfeatures)) {
+                            for (var subfeature : subfeatures) {
+                                var value = m.getValue(subfeature);
+                                System.out.printf("\t\t%s : %.2f%n", subfeature, value.getValue());
+                            }
+                        }
+                    }
+                } else {
+                    System.out.println("\tDevice not found.");
+                }
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

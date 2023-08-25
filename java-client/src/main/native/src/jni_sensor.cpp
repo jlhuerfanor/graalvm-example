@@ -1,78 +1,42 @@
 #include "jni_sensor.h"
 
-#define OBJ_CONSTRUCTOR "<init>"
-#define JAVA_LANG_STRING_SIGNATURE "Ljava/lang/String;"
-
-#define DEVICE_INFO_CLASS "org/example/sensemon/application/model/DeviceInfo"
-
-#define DEVICE_BUS_CLASS "org/example/sensemon/application/model/DeviceBus"
-#define DEVICE_BUS_CTOR_SIGNATURE "()V"
-#define DEVICE_BUS_SIGNATURE "Lorg/example/sensemon/application/model/DeviceBus;"
-
-#define BUS_TYPE_CLASS "org/example/sensemon/application/model/BusType"
-#define BUS_TYPE_ENUM_SIGNATURE "Lorg/example/sensemon/application/model/BusType;"
-#define BUS_TYPE_FROM_CODE "fromCode"
-#define BUS_TYPE_FROM_CODE_SIGNATURE "(I)Lorg/example/sensemon/application/model/BusType;"
-
 namespace jsensors {
 
 
-std::map<std::string, sensor_chip_name_p> detected_chips;
+std::vector<sensor_chip_name_p> detected_chips;
+std::multimap<int, sensor_feature_p> chip_features;
+std::multimap<feature_key, sensor_subfeature_p, feature_key_comp> chip_sub_features;
 bool sensors_ready = false;
 
-jobject create_string(JNIEnv * env, const char * value) {
-    return env->NewStringUTF(value);
+sensor_feature_p get_feature(const feature_key & key) {
+    auto current = chip_features.lower_bound(key.device_number);
+    auto last = chip_features.upper_bound(key.device_number);
+
+    while(current != last) {
+        if(current->first == key.device_number && current->second->number == key.feature_number) {
+            return current->second;
+        }
+        current++;
+    }
+
+    return NULL;
 }
 
-jobject create_string(JNIEnv * env, const std::string & string) {
-    return create_string(env, string.c_str());
-}
+sensor_subfeature_p get_sub_feature(const sub_feature_key & key) {
+    feature_key feature_k = { key.device_number, key.feature_number };
+    auto current = chip_sub_features.lower_bound(feature_k);
+    auto last = chip_sub_features.upper_bound(feature_k);
 
-jobject get_bus_type_from_code(JNIEnv * env, jint code) {
-    jclass bus_type_class = env->FindClass(BUS_TYPE_CLASS);
-    jmethodID bus_type_from_code = env->GetStaticMethodID(bus_type_class, BUS_TYPE_FROM_CODE, 
-            BUS_TYPE_FROM_CODE_SIGNATURE);
-    return env->CallStaticObjectMethod(bus_type_class, bus_type_from_code, code);
-}
+    while(current != last) {
+        if(current->first.device_number == key.device_number
+                && current->first.feature_number == key.feature_number
+                && current->second->number == key.sub_feature_number) {
+            return current->second;
+        }
+        current++;
+    }
 
-jobject create_device_bus(JNIEnv * env, const sensors_bus_id & bus_id) {
-    auto device_bus_class = env->FindClass(DEVICE_BUS_CLASS);
-    auto device_bus_ctor_id = env->GetMethodID(device_bus_class, OBJ_CONSTRUCTOR, DEVICE_BUS_CTOR_SIGNATURE);
-    auto field_type = env->GetFieldID(device_bus_class, "type", BUS_TYPE_ENUM_SIGNATURE);
-    auto field_number = env->GetFieldID(device_bus_class, "number", "I");
-
-    auto device_bus = env->NewObject(device_bus_class, device_bus_ctor_id);
-    auto bus_type = get_bus_type_from_code(env, bus_id.type);
-    
-    env->SetObjectField(device_bus, field_type, bus_type);
-    env->SetIntField(device_bus, field_number, bus_id.nr);
-
-    return device_bus;
-}
-
-jobject create_device_info(JNIEnv * env, const std::string & name, sensor_chip_name_p chip) {
-    auto device_info_class = env->FindClass(DEVICE_INFO_CLASS);
-
-    auto device_info_ctor_id = env->GetMethodID(device_info_class, "<init>", "()V");
-    auto field_prefix = env->GetFieldID(device_info_class, "prefix", JAVA_LANG_STRING_SIGNATURE);
-    auto field_bus = env->GetFieldID(device_info_class, "bus", DEVICE_BUS_SIGNATURE);
-    auto field_path = env->GetFieldID(device_info_class, "path", JAVA_LANG_STRING_SIGNATURE);
-    auto field_address = env->GetFieldID(device_info_class, "address", "I");
-    auto field_name = env->GetFieldID(device_info_class, "name", JAVA_LANG_STRING_SIGNATURE);
-    
-    auto prefix = create_string(env, chip->prefix);
-    auto bus = create_device_bus(env, chip->bus);
-    auto path = create_string(env, chip->path);
-    auto device_name = create_string(env, name);
-    auto device_info = env->NewObject(device_info_class, device_info_ctor_id);
-
-    env->SetObjectField(device_info, field_prefix, prefix);
-    env->SetObjectField(device_info, field_bus, bus);
-    env->SetObjectField(device_info, field_path, path);
-    env->SetIntField(device_info, field_address, chip->addr);
-    env->SetObjectField(device_info, field_name, device_name);
-
-    return device_info;
+    return NULL;
 }
 
 bool init() {
@@ -80,13 +44,26 @@ bool init() {
         sensors_ready = sensors_init(NULL) == 0;
 
         if(sensors_ready) {
-            sensor_chip_name_p current;
-            int number = 0;
+            sensor_chip_name_p current_chip;
+            int chip_number = 0;
 
-            while((current = sensors_get_detected_chips(NULL, &number))) {
-                std::string name = get_name(current);
+            while((current_chip = sensors_get_detected_chips(NULL, &chip_number))) {
+                sensor_feature_p current_feature;
+                int feature_number = 0;
 
-                detected_chips[name] = current;
+                detected_chips.push_back(current_chip);
+                
+                while((current_feature = sensors_get_features(current_chip, &feature_number))) {
+                    sensor_subfeature_p current_subfeature;
+                    int sub_feature_number = 0;
+
+                    chip_features.insert(std::pair<int, sensor_feature_p>(chip_number, current_feature));
+
+                    while((current_subfeature = sensors_get_all_subfeatures(current_chip, current_feature, &sub_feature_number))) {
+                        feature_key feature_k = { chip_number, current_feature->number };
+                        chip_sub_features.insert(std::pair<feature_key, sensor_subfeature_p>(feature_k, current_subfeature));
+                    }
+                }
             }
         } else {
             sensors_cleanup();
@@ -96,61 +73,124 @@ bool init() {
     return sensors_ready;
 }
 
-std::string get_name(sensor_chip_name_p chip) {
-    std::size_t size = sensors_snprintf_chip_name(NULL, 0, chip) + 1;
-
-    if(size > 0) {
-        char * name_ptr = new char[size + 1];
-        sensors_snprintf_chip_name(name_ptr, size, chip);
-
-        return std::string(name_ptr, size);
-    } else {
-        return "";
-    }
-}
-
 jobjectArray create_device_infos(JNIEnv * env) {
-    jclass device_info_class = env->FindClass(DEVICE_INFO_CLASS);
-    jobjectArray array = env->NewObjectArray(detected_chips.size(), 
-            device_info_class, NULL);
-    
-    if(!detected_chips.empty()) {
+    if(sensors_ready) {
+        jclass device_info_class = env->FindClass(DEVICE_INFO_CLASS);
+        jobjectArray array = env->NewObjectArray(detected_chips.size(), device_info_class, NULL);
         int i = 0;
 
         for(auto entry : detected_chips) {
-            auto device_info = create_device_info(env, entry.first, entry.second);
-
-            env->SetObjectArrayElement(array, i++, device_info);
+            jsensors::device_info_wrapper device(env, i, entry);
+            env->SetObjectArrayElement(array, i++, device.get_this());
         }
+
+        return array;
     }
-
-    return array;
-}
-
-jobjectArray create_device_features(JNIEnv * env) {
-    jclass device_info_class = env->FindClass(DEVICE_INFO_CLASS);
-    jobjectArray array = env->NewObjectArray(detected_chips.size(), 
-            device_info_class, NULL);
-    
-    if(!detected_chips.empty()) {
-        int i = 0;
-
-        for(auto entry : detected_chips) {
-            auto device_info = create_device_info(env, entry.first, entry.second);
-
-            env->SetObjectArrayElement(array, i++, device_info);
-        }
-    }
-
-    return array;
+    return NULL;
 }
 
 jobjectArray create_device_feature_infos(JNIEnv * env, jobject device_info) {
-    
+    if(sensors_ready) {
+        jsensors::device_info_wrapper device(env, device_info);
+        auto device_number = device.get_system_id();
+
+        if(device_number < detected_chips.size()) {
+            auto chip = detected_chips[device.get_system_id()];
+            auto current = chip_features.lower_bound(device_number);
+            auto last = chip_features.upper_bound(device_number);
+            std::vector<jsensors::feature_info_wrapper> features;
+
+            while(current != last) {
+                if(current->first == device_number) {
+                    jsensors::feature_info_wrapper feature(env, device_info, current->second);
+                    features.push_back(feature);
+                }
+                current++;
+            }
+
+            jclass cls = env->FindClass(FEATURE_INFO_CLASS);
+            jobjectArray array = env->NewObjectArray(features.size(), cls, NULL);
+            int i = 0;
+
+            for(auto entry : features) {
+                env->SetObjectArrayElement(array, i++, entry.get_this());
+            }
+
+            return array;
+        } 
+    }
+
+    return NULL;
+}
+
+jobjectArray create_device_sub_feature_infos(JNIEnv * env, jobject feature_info) {
+    if(sensors_ready) {
+        auto feature = jsensors::feature_info_wrapper(env, feature_info);
+        auto device = feature.get_device_info();    
+        auto device_number = device.get_system_id();
+        auto feature_number = feature.get_number();
+
+        if(device_number < detected_chips.size()) {
+            auto chip_p = detected_chips[device_number];
+            auto feature_p = get_feature({ device_number, feature_number });
+
+            if(feature_p != NULL) {
+                std::vector<jsensors::sub_feature_info_wrapper> subfeatures;
+                feature_key key = { device_number, feature_number };
+                auto current = chip_sub_features.lower_bound(key);
+                auto last = chip_sub_features.upper_bound(key);
+
+                while(current != last) {
+                    if(current->first.device_number == key.device_number
+                            && current->first.feature_number == key.feature_number) {
+                        subfeatures.push_back(jsensors::sub_feature_info_wrapper(env, 
+                                feature.get_this(),
+                                current->second));
+                    }
+
+                    current++;
+                }
+
+                jclass cls = env->FindClass(SUB_FEATURE_INFO_CLASS);
+                jobjectArray array = env->NewObjectArray(subfeatures.size(), cls, NULL);
+                int i = 0;
+
+                for(auto entry : subfeatures) {
+                    env->SetObjectArrayElement(array, i++, entry.get_this());
+                }
+
+                return array;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+jdouble get_sub_feature_value(JNIEnv * env, jobject sub_feature_info) {
+    if(sensors_ready) {
+        sub_feature_info_wrapper sub_feature(env, sub_feature_info);
+        auto feature = sub_feature.get_feature_info();
+        auto device = feature.get_device_info();
+        auto device_number = device.get_system_id();
+
+        if(device_number < detected_chips.size()) {
+            auto chip = detected_chips[device_number];
+            double value;
+
+            if(sensors_get_value(chip, sub_feature.get_number(), &value) == 0) {
+                return value;
+            }
+        }
+    }
+
+    return std::numeric_limits<double>::quiet_NaN();
 }
 
 void cleanup() {
     detected_chips.clear();
+    chip_features.clear();
+    chip_sub_features.clear();
     sensors_cleanup();
 }
 

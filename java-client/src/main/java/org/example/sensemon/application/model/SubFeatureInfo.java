@@ -15,4 +15,16 @@ public class SubFeatureInfo {
     private int flags;
 
     private FeatureInfo featureInfo;
+
+    @Override
+    public String toString() {
+        return ("SubFeatureInfo { " +
+                "name = '%s'" +
+                ", number = '%s'" +
+                ", type = '%s'" +
+                ", mapping = '%d'" +
+                ", flags = '%d'" +
+                " }").formatted(
+                name, number, type, mapping, flags);
+    }
 }

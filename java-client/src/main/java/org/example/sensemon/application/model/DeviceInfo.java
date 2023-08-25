@@ -1,5 +1,6 @@
 package org.example.sensemon.application.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -16,9 +17,12 @@ public class DeviceInfo {
     private int address;
     private String name;
 
+    @Getter(AccessLevel.NONE)
+    private int systemId;
+
     @Override
     public String toString() {
-        return ("{ name = '%s', " +
+        return ("DeviceInfo { name = '%s', " +
                 "prefix = '%s', " +
                 "bus = %s, " +
                 "path = '%s'," +
