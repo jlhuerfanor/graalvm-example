@@ -11,7 +11,7 @@ feature_info_wrapper::feature_info_wrapper(JNIEnv * env, jobject feature_info) {
     this->set_field_ids(cls);
 }
 
-feature_info_wrapper::feature_info_wrapper(JNIEnv * env, jobject device_info, const sensors_feature * feature) {
+feature_info_wrapper::feature_info_wrapper(JNIEnv * env, jobject device_info,  const int & system_id, const sensors_feature * feature) {
     auto cls = env->FindClass(FEATURE_INFO_CLASS);
     auto constructorId = env->GetMethodID(cls, "<init>", "()V");
 
@@ -23,6 +23,7 @@ feature_info_wrapper::feature_info_wrapper(JNIEnv * env, jobject device_info, co
     this->set_number(feature->number);
     this->set_name(std::string(feature->name));
     this->set_feature_type(ENUM_FROM_CODE(env, FEATURE_TYPE, feature->type));
+    this->set_system_id(system_id);
 }
 
 void feature_info_wrapper::set_field_ids(jclass cls) {
@@ -30,6 +31,7 @@ void feature_info_wrapper::set_field_ids(jclass cls) {
     this->field_number = env->GetFieldID(cls, "number", "I");
     this->field_feature_type = env->GetFieldID(cls, "featureType", FEATURE_TYPE_ENUM_SIGNATURE);
     this->field_device_info = env->GetFieldID(cls, "deviceInfo", DEVICE_INFO_SIGNATURE);
+    this->field_system_id = env->GetFieldID(cls, "systemId", "I");
 }
 
 feature_info_wrapper::~feature_info_wrapper() { }
@@ -48,6 +50,9 @@ device_info_wrapper feature_info_wrapper::get_device_info() const {
     auto value = env->GetObjectField(feature_info, field_device_info);
     return device_info_wrapper(env, value);
 }
+jint feature_info_wrapper::get_system_id() const {
+    return env->GetIntField(feature_info, field_system_id);
+}
 
 jobject feature_info_wrapper::get_this() const {
     return this->feature_info;
@@ -65,6 +70,9 @@ void feature_info_wrapper::set_feature_type(jobject value) const {
 }
 void feature_info_wrapper::set_device_info(jobject value) const {
     env->SetObjectField(feature_info, field_device_info, value);
+}
+void feature_info_wrapper::set_system_id(const jint & value) const {
+    env->SetIntField(feature_info, field_system_id, value);
 }
 
 

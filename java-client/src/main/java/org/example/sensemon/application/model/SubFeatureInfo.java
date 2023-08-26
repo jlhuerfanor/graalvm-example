@@ -13,6 +13,7 @@ public class SubFeatureInfo {
     private SubFeatureType type;
     private int mapping;
     private int flags;
+    private int systemId;
 
     private FeatureInfo featureInfo;
 
@@ -24,7 +25,8 @@ public class SubFeatureInfo {
                 ", type = '%s'" +
                 ", mapping = '%d'" +
                 ", flags = '%d'" +
+                ", systemId = '%d'" +
                 " }").formatted(
-                name, number, type, mapping, flags);
+                name, number, type, mapping, flags, systemId);
     }
 }

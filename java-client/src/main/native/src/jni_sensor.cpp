@@ -2,7 +2,6 @@
 
 namespace jsensors {
 
-
 std::vector<sensor_chip_name_p> detected_chips;
 std::multimap<int, sensor_feature_p> chip_features;
 std::multimap<feature_key, sensor_subfeature_p, feature_key_comp> chip_sub_features;
@@ -57,10 +56,10 @@ bool init() {
                     sensor_subfeature_p current_subfeature;
                     int sub_feature_number = 0;
 
-                    chip_features.insert(std::pair<int, sensor_feature_p>(chip_number, current_feature));
+                    chip_features.insert(std::pair<int, sensor_feature_p>(chip_number - 1, current_feature));
 
                     while((current_subfeature = sensors_get_all_subfeatures(current_chip, current_feature, &sub_feature_number))) {
-                        feature_key feature_k = { chip_number, current_feature->number };
+                        feature_key feature_k = { chip_number - 1, feature_number - 1 };
                         chip_sub_features.insert(std::pair<feature_key, sensor_subfeature_p>(feature_k, current_subfeature));
                     }
                 }
@@ -102,7 +101,7 @@ jobjectArray create_device_feature_infos(JNIEnv * env, jobject device_info) {
 
             while(current != last) {
                 if(current->first == device_number) {
-                    jsensors::feature_info_wrapper feature(env, device_info, current->second);
+                    jsensors::feature_info_wrapper feature(env, device_info, -1, current->second);
                     features.push_back(feature);
                 }
                 current++;
@@ -113,6 +112,7 @@ jobjectArray create_device_feature_infos(JNIEnv * env, jobject device_info) {
             int i = 0;
 
             for(auto entry : features) {
+                entry.set_system_id(i);
                 env->SetObjectArrayElement(array, i++, entry.get_this());
             }
 

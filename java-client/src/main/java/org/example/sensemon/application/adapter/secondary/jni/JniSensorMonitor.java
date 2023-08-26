@@ -2,14 +2,23 @@ package org.example.sensemon.application.adapter.secondary.jni;
 
 
 import org.example.sensemon.application.adapter.secondary.SensorMonitor;
-import org.example.sensemon.application.model.*;
-import java.io.IOException;
+import org.example.sensemon.application.model.DeviceInfo;
+import org.example.sensemon.application.model.FeatureInfo;
+import org.example.sensemon.application.model.SensorData;
+import org.example.sensemon.application.model.SubFeatureInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
+    private static final Logger log = LoggerFactory.getLogger(JniSensorMonitor.class);
+
     static {
+        log.info("Loading native library...");
         System.load("/home/jhuerfano/git/endava/graalvm/java-client/src/main/native/build/libjsensors.so");
     }
 
@@ -25,17 +34,14 @@ public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
     private final Map<String, List<FeatureInfo>> featureInfoMap = new ConcurrentHashMap<>();
     private final Map<FeatureKey, List<SubFeatureInfo>> subfeatureInfoMap = new ConcurrentHashMap<>();
 
-    public JniSensorMonitor() throws IOException {
+    public JniSensorMonitor() {
         sensorsReady = sensorsReady || sensorsInit();
-
-        if(!sensorsReady) {
-            throw new IOException("Sensors library initialization error");
-        }
+        log.atLevel(sensorsReady ? Level.INFO : Level.ERROR).log("Initialized sensors");
     }
 
     @Override
     public List<DeviceInfo> getDevices() {
-        if(Objects.isNull(sensors)) {
+        if(sensorsReady && Objects.isNull(sensors)) {
             sensors = Arrays.stream(getChipNames()).toList();
         }
 
@@ -44,37 +50,44 @@ public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
 
     @Override
     public List<FeatureInfo> getFeatures(DeviceInfo device) {
-        return featureInfoMap.computeIfAbsent(device.getName(), (unused) -> Optional.of(device)
-                .map(JniSensorMonitor::getChipFeatures)
-                .map(Arrays::stream)
-                .map(Stream::toList)
-                .orElse(null));
+        if(sensorsReady) {
+            return featureInfoMap.computeIfAbsent(device.getName(), (unused) -> Optional.of(device)
+                    .map(JniSensorMonitor::getChipFeatures)
+                    .map(Arrays::stream)
+                    .map(Stream::toList)
+                    .orElse(null));
+        } else return Collections.emptyList();
     }
 
     @Override
     public List<SubFeatureInfo> getSubFeatures(FeatureInfo feature) {
-        var key = new FeatureKey(feature.getDeviceInfo().getName(), feature.getNumber());
+        if(sensorsReady) {
+            var key = new FeatureKey(feature.getDeviceInfo().getName(), feature.getNumber());
 
-        return subfeatureInfoMap.computeIfAbsent(key, (unused) -> Optional.of(feature)
-                .map(JniSensorMonitor::getChipSubFeatures)
-                .map(Arrays::stream)
-                .map(Stream::toList)
-                .orElse(null));
+            return subfeatureInfoMap.computeIfAbsent(key, (unused) -> Optional.of(feature)
+                    .map(JniSensorMonitor::getChipSubFeatures)
+                    .map(Arrays::stream)
+                    .map(Stream::toList)
+                    .orElse(null));
+        } return Collections.emptyList();
     }
 
     @Override
     public SensorData getValue(SubFeatureInfo subFeature) {
-        double value = getSubFeatureValue(subFeature);
+        if(sensorsReady) {
+            double value = getSubFeatureValue(subFeature);
 
-        return SensorData.builder()
-                .failed(Double.isNaN(value))
-                .value(value)
-                .build();
+            return SensorData.builder()
+                    .failed(Double.isNaN(value))
+                    .value(value)
+                    .build();
+        } else return SensorData.builder().failed(true).build();
     }
 
     @Override
     public void close() {
         sensorsCleanup();
+        log.info("Cleaned up sensors");
     }
 
     private record FeatureKey(String deviceName, int featureNumber) implements Comparable<FeatureKey> {

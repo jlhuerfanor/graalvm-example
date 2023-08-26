@@ -1,0 +1,3 @@
+application:
+  sensor-interface: '@sensors.interface@'
+  console-pattern: '%d{HH:mm:ss.SSS} [ %-30.30X{correlationId:-NONE} ] %-5level %-50.50logger{50} - %msg%n'

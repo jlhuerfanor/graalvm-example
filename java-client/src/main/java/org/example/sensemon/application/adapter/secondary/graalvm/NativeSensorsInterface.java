@@ -1,48 +1,49 @@
 package org.example.sensemon.application.adapter.secondary.graalvm;
 
+import org.example.sensemon.application.model.*;
 import org.graalvm.nativeimage.PinnedObject;
 import org.graalvm.nativeimage.StackValue;
 import org.graalvm.nativeimage.c.CContext;
 import org.graalvm.nativeimage.c.function.CFunction;
-import org.graalvm.nativeimage.c.struct.*;
+import org.graalvm.nativeimage.c.struct.CField;
+import org.graalvm.nativeimage.c.struct.CFieldAddress;
+import org.graalvm.nativeimage.c.struct.CPointerTo;
+import org.graalvm.nativeimage.c.struct.CStruct;
 import org.graalvm.nativeimage.c.type.*;
-import org.graalvm.word.Pointer;
 import org.graalvm.word.PointerBase;
-import org.graalvm.word.UnsignedWord;
 import org.graalvm.word.WordFactory;
 
 import java.util.List;
 
 @CContext(NativeSensorsInterface.Context.class)
 public final class NativeSensorsInterface {
-    @CStruct("sensors_bus_id")
-    public interface BusId extends PointerBase {
-        @CField("type")
-        @AllowWideningCast
-        short getType();
+    @CPointerTo(nameOfCType = "FILE")
+    public interface FilePointer extends PointerBase { }
 
+    @CStruct("sensors_bus_id")
+    public interface BusIdStruct extends PointerBase {
+        @CField("type")
+        short getBusType();
         @CField("nr")
-        @AllowWideningCast
-        short getNumber();
+        short getBusNumber();
     }
 
     @CStruct("sensors_chip_name")
-    public interface ChipName extends PointerBase {
-        @CField("prefix")
-        CCharPointer getPrefix();
-        @CField("bus")
-        @AllowWideningCast
-        BusId getBusId();
+    public interface ChipNameStruct extends PointerBase {
+        @CFieldAddress("prefix")
+        CCharPointerPointer getPrefix();
+        @CFieldAddress("bus")
+        BusIdStruct getBus();
         @CField("addr")
         int getAddress();
-        @CField("path")
-        CCharPointer getPath();
+        @CFieldAddress("path")
+        CCharPointerPointer getPath();
     }
 
     @CStruct("sensors_feature")
-    public interface Feature extends PointerBase {
-        @CField("name")
-        CCharPointer getName();
+    public interface FeatureStruct extends PointerBase {
+        @CFieldAddress("name")
+        CCharPointerPointer getName();
         @CField("number")
         int getNumber();
         @CField("type")
@@ -54,38 +55,17 @@ public final class NativeSensorsInterface {
     }
 
     @CStruct("sensors_subfeature")
-    public interface SubFeature extends PointerBase {
-        @CField("name")
-        CCharPointer getName();
+    public interface SubFeatureStruct extends PointerBase {
+        @CFieldAddress("name")
+        CCharPointerPointer getName();
         @CField("number")
         int getNumber();
         @CField("type")
         int getType();
         @CField("mapping")
-        int getFirstSubFeature();
+        int getMapping();
         @CField("flags")
-        int getPadding1();
-    }
-
-    @CPointerTo(nameOfCType = "FILE")
-    public interface FilePointer extends PointerBase { }
-
-    @CPointerTo(ChipName.class)
-    @CConst
-    public interface ChipNamePointer extends PointerBase {
-        ChipName read();
-        void write(ChipName value);
-    }
-
-    @CPointerTo(Feature.class)
-    @CConst
-    public interface FeaturePointer extends PointerBase {
-        void write(Feature value);
-    }
-
-    @CPointerTo(SubFeature.class)
-    public interface SubFeaturePointer extends PointerBase {
-        void write(SubFeature value);
+        int getFlags();
     }
 
     @CFunction("sensors_init")
@@ -95,24 +75,24 @@ public final class NativeSensorsInterface {
     public static native void cleanup();
 
     @CFunction("sensors_get_detected_chips")
-    public static native ChipNamePointer getDetectedChips(
-            @CConst ChipNamePointer name,
+    public static native @CConst ChipNameStruct getDetectedChips(
+            @CConst ChipNameStruct chipName,
             CIntPointer number);
 
     @CFunction("sensors_get_features")
-    public static native ChipNamePointer getFeatures(
-            @CConst ChipNamePointer name,
+    public static native @CConst FeatureStruct getFeatures(
+            @CConst ChipNameStruct chipName,
             CIntPointer number);
 
     @CFunction("sensors_get_all_subfeatures")
-    public static native ChipNamePointer getSubFeatures(
-            @CConst ChipNamePointer name,
-            @CConst FeaturePointer feature,
+    public static native @CConst SubFeatureStruct getSubFeatures(
+            @CConst ChipNameStruct chipName,
+            @CConst FeatureStruct feature,
             CIntPointer number);
 
     @CFunction("sensors_get_value")
     public static native int getValue(
-            @CConst ChipNamePointer name,
+            @CConst ChipNameStruct chipName,
             int subFeatureNumber,
             CDoublePointer value);
 
@@ -120,11 +100,28 @@ public final class NativeSensorsInterface {
     public static native int printName(
             CCharPointer str,
             int size,
-            @CConst ChipNamePointer name);
+            @CConst ChipNameStruct name);
 
-    public static String getName(@CConst ChipNamePointer chipName) {
+    public static ChipNameStruct getChipName(int id) {
+        var chipNumberPtr = StackValue.get(CIntPointer.class);
+        NativeSensorsInterface.ChipNameStruct chipName;
+
+        chipNumberPtr.write(id);
+
+        return NativeSensorsInterface.getDetectedChips(WordFactory.nullPointer(), chipNumberPtr);
+    }
+
+    public static @CConst FeatureStruct getFeature(@CConst ChipNameStruct chipName, int id) {
+        if(chipName.isNonNull()) {
+            var featureNumber = StackValue.get(CIntPointer.class);
+            featureNumber.write(id);
+            return NativeSensorsInterface.getFeatures(chipName, featureNumber);
+        } return WordFactory.nullPointer();
+    }
+
+    public static String getName(@CConst ChipNameStruct chipName) {
         CCharPointer null_name = WordFactory.nullPointer();
-        var size = printName(null_name, 0, chipName);
+        var size = printName(null_name, 0, chipName) + 1;
         var buffer = new byte[size];
         String result = null;
 
@@ -133,10 +130,48 @@ public final class NativeSensorsInterface {
 
             printName(pointer, size, chipName);
 
-            result = CTypeConversion.toJavaString(pointer, WordFactory.unsigned(size));
+            result = CTypeConversion.utf8ToJavaString(pointer);
         }
 
         return result;
+    }
+    public static String toString(@CConst CCharPointer pointer) {
+        return pointer.isNonNull() ? CTypeConversion.utf8ToJavaString(pointer) : null;
+    }
+    public static DeviceInfo toDeviceInfo(@CConst CIntPointer numberPtr, @CConst ChipNameStruct ptr) {
+        var name = getName(ptr);
+
+        return DeviceInfo.builder()
+                .name(name)
+                .bus(DeviceBus.builder()
+                        .type(BusType.fromCode(ptr.getBus().getBusType()))
+                        .number(ptr.getBus().getBusNumber())
+                        .build())
+                .prefix(toString(ptr.getPrefix().read()))
+                .path(toString(ptr.getPath().read()))
+                .address(ptr.getAddress())
+                .systemId(numberPtr.read() - 1)
+                .build();
+    }
+    public static FeatureInfo toFeatureInfo(@CConst CIntPointer numberPtr, @CConst FeatureStruct ptr) {
+        return FeatureInfo.builder()
+                .name(toString(ptr.getName().read()))
+                .number(ptr.getNumber())
+                .featureType(FeatureType.fromCode(ptr.getType()))
+                .systemId(numberPtr.read() - 1)
+                .build();
+    }
+
+    public static SubFeatureInfo toSubFeatureInfo(@CConst CIntPointer numberPtr, @CConst SubFeatureStruct ptr) {
+
+        return SubFeatureInfo.builder()
+                .name(toString(ptr.getName().read()))
+                .number(ptr.getNumber())
+                .type(SubFeatureType.fromCode(ptr.getType()))
+                .mapping(ptr.getMapping())
+                .flags(ptr.getFlags())
+                .systemId(numberPtr.read() - 1)
+                .build();
     }
 
     public static class Context implements CContext.Directives {
@@ -147,7 +182,8 @@ public final class NativeSensorsInterface {
 
         @Override
         public List<String> getHeaderFiles() {
-            return List.of("</usr/include/sensors/sensors.h>");
+            return List.of("<string.h>",
+                    "</usr/include/sensors/sensors.h>");
         }
     }
 }
