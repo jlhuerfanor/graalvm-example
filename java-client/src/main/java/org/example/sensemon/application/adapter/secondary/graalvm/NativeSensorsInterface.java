@@ -1,12 +1,15 @@
-package org.example.sensemon.application.adapter.secondary.nativ;
+package org.example.sensemon.application.adapter.secondary.graalvm;
 
+import org.graalvm.nativeimage.PinnedObject;
+import org.graalvm.nativeimage.StackValue;
 import org.graalvm.nativeimage.c.CContext;
 import org.graalvm.nativeimage.c.function.CFunction;
-import org.graalvm.nativeimage.c.struct.CField;
-import org.graalvm.nativeimage.c.struct.CPointerTo;
-import org.graalvm.nativeimage.c.struct.CStruct;
+import org.graalvm.nativeimage.c.struct.*;
 import org.graalvm.nativeimage.c.type.*;
+import org.graalvm.word.Pointer;
 import org.graalvm.word.PointerBase;
+import org.graalvm.word.UnsignedWord;
+import org.graalvm.word.WordFactory;
 
 import java.util.List;
 
@@ -15,9 +18,11 @@ public final class NativeSensorsInterface {
     @CStruct("sensors_bus_id")
     public interface BusId extends PointerBase {
         @CField("type")
+        @AllowWideningCast
         short getType();
 
         @CField("nr")
+        @AllowWideningCast
         short getNumber();
     }
 
@@ -26,6 +31,7 @@ public final class NativeSensorsInterface {
         @CField("prefix")
         CCharPointer getPrefix();
         @CField("bus")
+        @AllowWideningCast
         BusId getBusId();
         @CField("addr")
         int getAddress();
@@ -61,9 +67,13 @@ public final class NativeSensorsInterface {
         int getPadding1();
     }
 
+    @CPointerTo(nameOfCType = "FILE")
+    public interface FilePointer extends PointerBase { }
+
     @CPointerTo(ChipName.class)
     @CConst
     public interface ChipNamePointer extends PointerBase {
+        ChipName read();
         void write(ChipName value);
     }
 
@@ -79,7 +89,7 @@ public final class NativeSensorsInterface {
     }
 
     @CFunction("sensors_init")
-    public static native void init(VoidPointer pointer);
+    public static native int init(FilePointer pointer);
 
     @CFunction("sensors_cleanup")
     public static native void cleanup();
@@ -112,10 +122,32 @@ public final class NativeSensorsInterface {
             int size,
             @CConst ChipNamePointer name);
 
+    public static String getName(@CConst ChipNamePointer chipName) {
+        CCharPointer null_name = WordFactory.nullPointer();
+        var size = printName(null_name, 0, chipName);
+        var buffer = new byte[size];
+        String result = null;
+
+        try(var pinned = PinnedObject.create(buffer)) {
+            var pointer = pinned.<CCharPointer>addressOfArrayElement(0);
+
+            printName(pointer, size, chipName);
+
+            result = CTypeConversion.toJavaString(pointer, WordFactory.unsigned(size));
+        }
+
+        return result;
+    }
+
     public static class Context implements CContext.Directives {
         @Override
-        public List<String> getLibraryPaths() {
-            return List.of("/home/jhuerfano/git/endava/graalvm/java-client/src/main/native/build/libjsensors.so");
+        public List<String> getLibraries() {
+            return List.of("sensors");
+        }
+
+        @Override
+        public List<String> getHeaderFiles() {
+            return List.of("</usr/include/sensors/sensors.h>");
         }
     }
 }

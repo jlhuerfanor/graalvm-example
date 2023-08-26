@@ -1,5 +1,6 @@
 package org.example.sensemon.infrastructure;
 
+import org.example.sensemon.application.adapter.secondary.graalvm.NativeSensorMonitor;
 import org.example.sensemon.application.adapter.secondary.jni.JniSensorMonitor;
 import org.graalvm.polyglot.Value;
 
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 // @SpringBootApplication
 public class Application {
     public static void main(String[] args) {
-        try(var m = new JniSensorMonitor()) {
+        try(var m = new NativeSensorMonitor()) {
             var devices = m.getDevices();
 
             for (var device : devices) {
@@ -18,25 +19,23 @@ public class Application {
 
                 System.out.printf("%s%n", device);
 
-                if(Objects.nonNull(features)) {
-                    for (var feature : features) {
-                        var subfeatures = m.getSubFeatures(feature);
-
-                        System.out.printf("\t%s%n", feature);
-
-                        if(Objects.nonNull(subfeatures)) {
-                            for (var subfeature : subfeatures) {
-                                var value = m.getValue(subfeature);
-                                System.out.printf("\t\t%s : %.2f%n", subfeature, value.getValue());
-                            }
-                        }
-                    }
-                } else {
-                    System.out.println("\tDevice not found.");
-                }
+//                if(Objects.nonNull(features)) {
+//                    for (var feature : features) {
+//                        var subfeatures = m.getSubFeatures(feature);
+//
+//                        System.out.printf("\t%s%n", feature);
+//
+//                        if(Objects.nonNull(subfeatures)) {
+//                            for (var subfeature : subfeatures) {
+//                                var value = m.getValue(subfeature);
+//                                System.out.printf("\t\t%s : %.2f%n", subfeature, value.getValue());
+//                            }
+//                        }
+//                    }
+//                } else {
+//                    System.out.println("\tDevice not found.");
+//                }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
     public static void doYourThing(Value cpart) {

@@ -7,7 +7,7 @@ import org.example.sensemon.application.model.SubFeatureInfo;
 
 import java.util.List;
 
-public interface SensorMonitor {
+public interface SensorMonitor extends AutoCloseable {
     List<DeviceInfo> getDevices();
     List<FeatureInfo> getFeatures(DeviceInfo device);
     List<SubFeatureInfo> getSubFeatures(FeatureInfo feature);

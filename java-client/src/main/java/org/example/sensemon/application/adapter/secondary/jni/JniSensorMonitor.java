@@ -3,19 +3,13 @@ package org.example.sensemon.application.adapter.secondary.jni;
 
 import org.example.sensemon.application.adapter.secondary.SensorMonitor;
 import org.example.sensemon.application.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
-    private static final Logger log = LoggerFactory.getLogger(JniSensorMonitor.class);
-
     static {
-        log.info("Loading native code...");
         System.load("/home/jhuerfano/git/endava/graalvm/java-client/src/main/native/build/libjsensors.so");
     }
 
@@ -36,8 +30,6 @@ public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
 
         if(!sensorsReady) {
             throw new IOException("Sensors library initialization error");
-        } else {
-            log.info("Sensors initialized");
         }
     }
 
@@ -83,7 +75,6 @@ public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
     @Override
     public void close() {
         sensorsCleanup();
-        log.info("Sensors cleaned up");
     }
 
     private record FeatureKey(String deviceName, int featureNumber) implements Comparable<FeatureKey> {
