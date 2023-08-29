@@ -6,8 +6,6 @@ import org.example.sensemon.application.adapter.primary.rest.dto.SubFeatureInfoD
 import org.springframework.hateoas.Link;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
-
 public class ResourceUtils {
     public static DeviceInfoDto addResourceLinks(DeviceInfoDto source) {
         var selfUri = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -26,11 +24,11 @@ public class ResourceUtils {
     public static FeatureInfoDto addResourceLinks(String deviceName, FeatureInfoDto source) {
         var selfUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/sensors/{deviceName}/features/{featureId}")
-                .buildAndExpand(deviceName, source.getNumber());
+                .buildAndExpand(deviceName, source.getName());
 
         var subfeaturesUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/sensors/{deviceName}/features/{featureId}/sub-features")
-                .buildAndExpand(deviceName, source.getNumber());
+                .buildAndExpand(deviceName, source.getName());
 
         var deviceUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/sensors/{deviceName}")
@@ -42,18 +40,18 @@ public class ResourceUtils {
                 .add(Link.of(subfeaturesUri.toUriString()).withRel("sub-features"));
     }
 
-    public static SubFeatureInfoDto addResourceLinks(String deviceName, Integer featureNumber, SubFeatureInfoDto source) {
+    public static SubFeatureInfoDto addResourceLinks(String deviceName, String featureName, SubFeatureInfoDto source) {
         var selfUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/sensors/{deviceName}/features/{featureId}/sub-features/{subFeatureId}")
-                .buildAndExpand(deviceName, featureNumber, source.getNumber());
+                .buildAndExpand(deviceName, featureName, source.getName());
 
         var valueUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/sensors/{deviceName}/features/{featureId}/sub-features/{subFeatureId}/value")
-                .buildAndExpand(deviceName, featureNumber, source.getNumber());
+                .buildAndExpand(deviceName, featureName, source.getName());
 
         var featureUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/sensors/{deviceName}/features/{featureId}")
-                .buildAndExpand(deviceName, featureNumber);
+                .buildAndExpand(deviceName, featureName);
 
         return source
                 .add(Link.of(selfUri.toUriString()).withSelfRel())

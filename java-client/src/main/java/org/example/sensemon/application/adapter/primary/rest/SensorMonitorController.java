@@ -51,42 +51,42 @@ public class SensorMonitorController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/{deviceName}/features/{featureNumber}")
+    @GetMapping("/{deviceName}/features/{featureName}")
     public FeatureInfoDto getFeature(
             @PathVariable("deviceName") String deviceName,
-            @PathVariable("featureNumber") Integer featureNumber) {
-        return Optional.ofNullable(sensorsService.getFeature(deviceName, featureNumber))
+            @PathVariable("featureName") String featureName) {
+        return Optional.ofNullable(sensorsService.getFeature(deviceName, featureName))
                 .map(value -> conversionService.convert(value, FeatureInfoDto.class))
                 .map(value -> ResourceUtils.addResourceLinks(deviceName, value))
                 .orElseThrow();
     }
 
-    @GetMapping("/{deviceName}/features/{featureNumber}/sub-features")
+    @GetMapping("/{deviceName}/features/{featureName}/sub-features")
     public List<SubFeatureInfoDto> getSubFeatures(
             @PathVariable("deviceName") String deviceName,
-            @PathVariable("featureNumber") Integer featureNumber) {
-        return sensorsService.getSubFeatures(deviceName, featureNumber).stream()
+            @PathVariable("featureName") String featureName) {
+        return sensorsService.getSubFeatures(deviceName, featureName).stream()
                 .map(value -> conversionService.convert(value, SubFeatureInfoDto.class))
-                .map(value -> ResourceUtils.addResourceLinks(deviceName, featureNumber, value))
+                .map(value -> ResourceUtils.addResourceLinks(deviceName, featureName, value))
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/{deviceName}/features/{featureNumber}/sub-features/{subfeatureNumber}")
+    @GetMapping("/{deviceName}/features/{featureName}/sub-features/{subfeatureName}")
     public SubFeatureInfoDto getSubFeature(
             @PathVariable("deviceName") String deviceName,
-            @PathVariable("featureNumber") Integer featureNumber,
-            @PathVariable("subfeatureNumber") Integer subfeatureNumber) {
-        return Optional.ofNullable(sensorsService.getSubFeature(deviceName, featureNumber, subfeatureNumber))
+            @PathVariable("featureName") String featureName,
+            @PathVariable("subfeatureName") String subfeatureName) {
+        return Optional.ofNullable(sensorsService.getSubFeature(deviceName, featureName, subfeatureName))
                 .map(value -> conversionService.convert(value, SubFeatureInfoDto.class))
-                .map(value -> ResourceUtils.addResourceLinks(deviceName, featureNumber, value))
+                .map(value -> ResourceUtils.addResourceLinks(deviceName, featureName, value))
                 .orElseThrow();
     }
 
-    @GetMapping("/{deviceName}/features/{featureNumber}/sub-features/{subfeatureNumber}/value")
+    @GetMapping("/{deviceName}/features/{featureName}/sub-features/{subfeatureName}/value")
     public SensorData getValue(
             @PathVariable("deviceName") String deviceName,
-            @PathVariable("featureNumber") Integer featureNumber,
-            @PathVariable("subfeatureNumber") Integer subfeatureNumber) {
-        return sensorsService.getValue(deviceName, featureNumber, subfeatureNumber);
+            @PathVariable("featureName") String featureName,
+            @PathVariable("subfeatureName") String subfeatureName) {
+        return sensorsService.getValue(deviceName, featureName, subfeatureName);
     }
 }

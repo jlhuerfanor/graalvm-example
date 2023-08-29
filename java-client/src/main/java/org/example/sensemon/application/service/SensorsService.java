@@ -7,18 +7,17 @@ import org.example.sensemon.application.model.SensorData;
 import org.example.sensemon.application.model.SubFeatureInfo;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class SensorsService {
     private final SensorMonitor monitor;
     private final Map<String, DeviceInfo> deviceInfoMap = new HashMap<>();
-    private final Map<DeviceInfo, Map<Integer, FeatureInfo>> featureInfoMap = new HashMap<>();
-    private final Map<FeatureInfo, Map<Integer, SubFeatureInfo>> subFeatureInfoMap = new HashMap<>();
+    private final Map<DeviceInfo, Map<String, FeatureInfo>> featureInfoMap = new HashMap<>();
+    private final Map<FeatureInfo, Map<String, SubFeatureInfo>> subFeatureInfoMap = new HashMap<>();
 
     public SensorsService(SensorMonitor monitor) {
         this.monitor = monitor;
@@ -27,40 +26,46 @@ public class SensorsService {
     public DeviceInfo getDevice(String deviceName) {
         return checkDeviceCache().get(deviceName);
     }
-    public FeatureInfo getFeature(String deviceName, Integer deviceNumber) {
-        var device = checkDeviceCache().get(deviceName);
-
-        return checkFeatureCache(device).get(deviceNumber);
+    public FeatureInfo getFeature(String deviceName, String featureName) {
+        return Optional.of(getDevice(deviceName))
+                .map(this::checkFeatureCache)
+                .map(cache -> cache.get(featureName))
+                .orElse(null);
     }
-    public SubFeatureInfo getSubFeature(String deviceName, Integer deviceNumber, Integer subFeatureValue) {
-        var device = checkDeviceCache().get(deviceName);
-        var feature = checkFeatureCache(device).get(deviceNumber);
-
-        return checkSubFeatureCache(feature).get(subFeatureValue);
+    public SubFeatureInfo getSubFeature(String deviceName, String featureName, String subFeatureName) {
+        return Optional.of(getFeature(deviceName, featureName))
+                .map(this::checkSubFeatureCache)
+                .map(cache -> cache.get(subFeatureName))
+                .orElse(null);
     }
 
     public List<DeviceInfo> getDevices() {
         return checkDeviceCache().values().stream().toList();
     }
     public List<FeatureInfo> getFeatures(String deviceName) {
-        var device = checkDeviceCache().get(deviceName);
-
-        return checkFeatureCache(device).values().stream().toList();
+        return Optional.of(deviceName)
+                .map(this::getDevice)
+                .map(this::checkFeatureCache)
+                .map(Map::values)
+                .map(Collection::stream)
+                .map(Stream::toList)
+                .orElse(Collections.emptyList());
+    }
+    public List<SubFeatureInfo> getSubFeatures(String deviceName, String featureName) {
+        return Optional.of(this.getFeature(deviceName, featureName))
+                .map(this::checkSubFeatureCache)
+                .map(Map::values)
+                .map(Collection::stream)
+                .map(Stream::toList)
+                .orElse(Collections.emptyList());
     }
 
-    public List<SubFeatureInfo> getSubFeatures(String deviceName, Integer featureNumber) {
+    public SensorData getValue(String deviceName, String featureName, String subFeatureName) {
         var device = checkDeviceCache().get(deviceName);
-        var feature = checkFeatureCache(device).get(featureNumber);
+        var feature = checkFeatureCache(device).get(featureName);
 
-        return checkSubFeatureCache(feature).values().stream().toList();
-    }
-
-    public SensorData getValue(String deviceName, Integer featureNumber, Integer subFeatureNumber) {
-        var device = checkDeviceCache().get(deviceName);
-        var feature = checkFeatureCache(device).get(featureNumber);
-
-        return monitor.getValue(checkSubFeatureCache(feature).get(subFeatureNumber));
-    }
+        return monitor.getValue(checkSubFeatureCache(feature).get(subFeatureName));
+   }
 
     private Map<String, DeviceInfo> checkDeviceCache() {
         if(deviceInfoMap.isEmpty()) {
@@ -68,16 +73,14 @@ public class SensorsService {
         }
         return deviceInfoMap;
     }
-
-    private Map<Integer, FeatureInfo> checkFeatureCache(DeviceInfo device) {
+    private Map<String, FeatureInfo> checkFeatureCache(DeviceInfo device) {
         return featureInfoMap.computeIfAbsent(device, unused -> monitor.getFeatures(device).stream().collect(Collectors.toMap(
-                FeatureInfo::getNumber,
+                FeatureInfo::getName,
                 UnaryOperator.identity())));
     }
-
-    private Map<Integer, SubFeatureInfo> checkSubFeatureCache(FeatureInfo feature) {
+    private Map<String, SubFeatureInfo> checkSubFeatureCache(FeatureInfo feature) {
         return subFeatureInfoMap.computeIfAbsent(feature, unused -> monitor.getSubFeatures(feature).stream().collect(Collectors.toMap(
-                SubFeatureInfo::getNumber,
+                SubFeatureInfo::getName,
                 UnaryOperator.identity())));
     }
 }

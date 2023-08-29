@@ -66,7 +66,9 @@
                 <filtering>true</filtering>
             </resource>
             <resource>
-                <directory>src/main/shared</directory>
+                <directory>src/main/setup</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}</targetPath>
             </resource>
         </resources>
         <pluginManagement>
