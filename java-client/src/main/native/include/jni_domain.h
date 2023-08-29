@@ -9,6 +9,7 @@
 #define DEVICE_INFO_CLASS "org/example/sensemon/application/model/DeviceInfo"
 #define FEATURE_INFO_CLASS "org/example/sensemon/application/model/FeatureInfo"
 #define SUB_FEATURE_INFO_CLASS "org/example/sensemon/application/model/SubFeatureInfo"
+#define SENSOR_DATA_CLASS "org/example/sensemon/application/model/SensorData"
 
 #define STRING_SIGNATURE "Ljava/lang/String;"
 #define DEVICE_BUS_SIGNATURE "Lorg/example/sensemon/application/model/DeviceBus;"

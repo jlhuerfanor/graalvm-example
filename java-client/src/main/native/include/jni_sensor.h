@@ -14,6 +14,7 @@
 #include "device_info_wrapper.h"
 #include "feature_info_wrapper.h"
 #include "sub_feature_info_wrapper.h"
+#include "sensor_data_wrapper.h"
 
 namespace jsensors {
 
@@ -28,7 +29,7 @@ std::string get_name(sensor_chip_name_p chip);
 jobjectArray create_device_infos(JNIEnv * env);
 jobjectArray create_device_feature_infos(JNIEnv * env, jobject device_info);
 jobjectArray create_device_sub_feature_infos(JNIEnv * env, jobject feature_info);
-jdouble get_sub_feature_value(JNIEnv * env, jobject sub_feature_info);
+jobject get_sub_feature_value(JNIEnv * env, jobject sub_feature_info);
 
 void cleanup();
 

@@ -28,7 +28,7 @@ public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
     private static native DeviceInfo[] getChipNames();
     private static native FeatureInfo[] getChipFeatures(DeviceInfo deviceInfo);
     private static native SubFeatureInfo[] getChipSubFeatures(FeatureInfo featureInfo);
-    private static native double getSubFeatureValue(SubFeatureInfo subFeatureInfo);
+    private static native SensorData getSubFeatureValue(SubFeatureInfo subFeatureInfo);
 
     private List<DeviceInfo> sensors;
     private final Map<String, List<FeatureInfo>> featureInfoMap = new ConcurrentHashMap<>();
@@ -75,12 +75,7 @@ public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
     @Override
     public SensorData getValue(SubFeatureInfo subFeature) {
         if(sensorsReady) {
-            double value = getSubFeatureValue(subFeature);
-
-            return SensorData.builder()
-                    .failed(Double.isNaN(value))
-                    .value(value)
-                    .build();
+            return getSubFeatureValue(subFeature);
         } else return SensorData.builder().failed(true).build();
     }
 

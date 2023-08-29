@@ -167,7 +167,12 @@ jobjectArray create_device_sub_feature_infos(JNIEnv * env, jobject feature_info)
     return NULL;
 }
 
-jdouble get_sub_feature_value(JNIEnv * env, jobject sub_feature_info) {
+jobject get_sub_feature_value(JNIEnv * env, jobject sub_feature_info) {
+    sensor_data_wrapper result(env);
+
+    result.set_failed(true);
+    result.set_value(0.0);
+
     if(sensors_ready) {
         sub_feature_info_wrapper sub_feature(env, sub_feature_info);
         auto feature = sub_feature.get_feature_info();
@@ -179,12 +184,13 @@ jdouble get_sub_feature_value(JNIEnv * env, jobject sub_feature_info) {
             double value;
 
             if(sensors_get_value(chip, sub_feature.get_number(), &value) == 0) {
-                return value;
+                result.set_failed(false);
+                result.set_value(value);
             }
         }
     }
 
-    return std::numeric_limits<double>::quiet_NaN();
+    return result.get_this();
 }
 
 void cleanup() {
