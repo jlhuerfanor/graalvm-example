@@ -1,6 +1,6 @@
 package org.example.sensemon.application.conversion;
 
-import org.example.sensemon.application.adapter.primary.rest.dto.FeatureInfoDto;
+import org.example.sensemon.adapter.rest.dto.FeatureInfoDto;
 import org.example.sensemon.application.model.FeatureInfo;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;

@@ -7,10 +7,9 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class SensorData {
+public class SensorReference {
+    private int ordinal;
     private String device;
     private String feature;
     private String subFeature;
-    private boolean success;
-    private double value;
 }

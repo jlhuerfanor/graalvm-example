@@ -170,7 +170,7 @@ jobjectArray create_device_sub_feature_infos(JNIEnv * env, jobject feature_info)
 jobject get_sub_feature_value(JNIEnv * env, jobject sub_feature_info) {
     sensor_data_wrapper result(env);
 
-    result.set_failed(true);
+    result.set_success(false);
     result.set_value(0.0);
 
     if(sensors_ready) {
@@ -184,7 +184,7 @@ jobject get_sub_feature_value(JNIEnv * env, jobject sub_feature_info) {
             double value;
 
             if(sensors_get_value(chip, sub_feature.get_number(), &value) == 0) {
-                result.set_failed(false);
+                result.set_success(true);
                 result.set_value(value);
             }
         }

@@ -13,7 +13,7 @@ private:
     jclass cls;
     jobject sensor_data;
 
-    jfieldID field_failed;
+    jfieldID field_success;
     jfieldID field_value;
 
     void set_fields();
@@ -22,11 +22,11 @@ public:
     sensor_data_wrapper(JNIEnv * env);
     ~sensor_data_wrapper();
 
-    jboolean get_failed() const;
+    jboolean get_success() const;
     jdouble get_value() const;
     jobject get_this() const;
 
-    void set_failed(const jboolean & value);
+    void set_success(const jboolean & value);
     void set_value(const jdouble & value);
 };
 

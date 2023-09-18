@@ -1,4 +1,4 @@
-package org.example.sensemon.application.adapter.primary.rest.dto;
+package org.example.sensemon.adapter.rest.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

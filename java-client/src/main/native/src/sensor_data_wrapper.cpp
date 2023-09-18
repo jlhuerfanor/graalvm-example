@@ -23,12 +23,12 @@ sensor_data_wrapper::sensor_data_wrapper(JNIEnv * env) {
 sensor_data_wrapper::~sensor_data_wrapper() { }
 
 void sensor_data_wrapper::set_fields() {
-    this->field_failed = env->GetFieldID(this->cls, "failed", "Z");
+    this->field_success = env->GetFieldID(this->cls, "success", "Z");
     this->field_value = env->GetFieldID(this->cls, "value", "D");
 }
 
-jboolean sensor_data_wrapper::get_failed() const {
-    return env->GetBooleanField(this->sensor_data, this->field_failed);
+jboolean sensor_data_wrapper::get_success() const {
+    return env->GetBooleanField(this->sensor_data, this->field_success);
 }
 
 jdouble sensor_data_wrapper::get_value() const {
@@ -39,8 +39,8 @@ jobject sensor_data_wrapper::get_this() const {
     return this->sensor_data;
 }
 
-void sensor_data_wrapper::set_failed(const jboolean & value) {
-    return env->SetBooleanField(this->sensor_data, this->field_failed, value);
+void sensor_data_wrapper::set_success(const jboolean & value) {
+    return env->SetBooleanField(this->sensor_data, this->field_success, value);
 }
 
 void sensor_data_wrapper::set_value(const jdouble & value) {

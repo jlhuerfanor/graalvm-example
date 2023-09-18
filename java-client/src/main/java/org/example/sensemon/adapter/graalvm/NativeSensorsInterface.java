@@ -1,4 +1,4 @@
-package org.example.sensemon.application.adapter.secondary.graalvm;
+package org.example.sensemon.adapter.graalvm;
 
 import org.example.sensemon.application.model.*;
 import org.graalvm.nativeimage.PinnedObject;

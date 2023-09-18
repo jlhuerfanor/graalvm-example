@@ -1,6 +1,6 @@
-package org.example.sensemon.application.adapter.secondary.graalvm;
+package org.example.sensemon.adapter.graalvm;
 
-import org.example.sensemon.application.adapter.secondary.SensorMonitor;
+import org.example.sensemon.adapter.SensorMonitor;
 import org.example.sensemon.application.model.DeviceInfo;
 import org.example.sensemon.application.model.FeatureInfo;
 import org.example.sensemon.application.model.SensorData;
@@ -118,7 +118,7 @@ public class NativeSensorMonitor implements SensorMonitor {
         var result = NativeSensorsInterface.getValue(nativeChipName, subFeature.getNumber(), value);
 
         return SensorData.builder()
-                .failed(result != 0)
+                .success(result == 0)
                 .value(value.read())
                 .build();
     }

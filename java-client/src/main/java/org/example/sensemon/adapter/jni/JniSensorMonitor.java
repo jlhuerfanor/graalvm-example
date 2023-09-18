@@ -1,7 +1,7 @@
-package org.example.sensemon.application.adapter.secondary.jni;
+package org.example.sensemon.adapter.jni;
 
 
-import org.example.sensemon.application.adapter.secondary.SensorMonitor;
+import org.example.sensemon.adapter.SensorMonitor;
 import org.example.sensemon.application.model.DeviceInfo;
 import org.example.sensemon.application.model.FeatureInfo;
 import org.example.sensemon.application.model.SensorData;
@@ -16,10 +16,16 @@ import java.util.stream.Stream;
 
 public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(JniSensorMonitor.class);
+    private static final String JSENSORS_LIBRARY_PATH = "jsensors.library-path";
 
     static {
         log.info("Loading native library...");
-        System.load("/home/jhuerfano/git/endava/graalvm/java-client/src/main/native/build/libjsensors.so");
+
+        Optional.of(JSENSORS_LIBRARY_PATH)
+                .map(System::getProperty)
+                .ifPresentOrElse(
+                        System::load,
+                        () -> { throw new UnsatisfiedLinkError("Unable to load libjsensors. Property jsensors.library-path is not set!"); });
     }
 
     private static boolean sensorsReady = false;
@@ -74,9 +80,15 @@ public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
 
     @Override
     public SensorData getValue(SubFeatureInfo subFeature) {
-        if(sensorsReady) {
-            return getSubFeatureValue(subFeature);
-        } else return SensorData.builder().failed(true).build();
+        var builder = sensorsReady
+                ? getSubFeatureValue(subFeature).toBuilder()
+                : SensorData.builder().success(false);
+
+        return builder
+                .subFeature(subFeature.getName())
+                .feature(subFeature.getFeatureInfo().getName())
+                .device(subFeature.getFeatureInfo().getDeviceInfo().getName())
+                .build();
     }
 
     @Override

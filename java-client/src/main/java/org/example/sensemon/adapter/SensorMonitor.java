@@ -1,4 +1,4 @@
-package org.example.sensemon.application.adapter.secondary;
+package org.example.sensemon.adapter;
 
 import org.example.sensemon.application.model.DeviceInfo;
 import org.example.sensemon.application.model.FeatureInfo;

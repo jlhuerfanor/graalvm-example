@@ -1,8 +1,8 @@
-package org.example.sensemon.application.adapter.primary.rest;
+package org.example.sensemon.adapter.rest;
 
-import org.example.sensemon.application.adapter.primary.rest.dto.DeviceInfoDto;
-import org.example.sensemon.application.adapter.primary.rest.dto.FeatureInfoDto;
-import org.example.sensemon.application.adapter.primary.rest.dto.SubFeatureInfoDto;
+import org.example.sensemon.adapter.rest.dto.DeviceInfoDto;
+import org.example.sensemon.adapter.rest.dto.FeatureInfoDto;
+import org.example.sensemon.adapter.rest.dto.SubFeatureInfoDto;
 import org.example.sensemon.application.model.SensorData;
 import org.example.sensemon.application.service.SensorsService;
 import org.springframework.core.convert.ConversionService;

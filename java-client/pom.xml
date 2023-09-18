@@ -47,6 +47,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-indexer</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
@@ -101,6 +106,11 @@
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>3.1.3</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -127,17 +137,22 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
         </plugins>
     </build>
 
     <profiles>
         <profile>
-            <id>generate-jni</id>
+            <id>jni</id>
             <build>
+                <resources>
+                    <resource>
+                        <directory>${project.basedir}/src/main/native</directory>
+                        <targetPath>${project.build.directory}/native</targetPath>
+                        <excludes>
+                            <exclude>**/build/**/*</exclude>
+                        </excludes>
+                    </resource>
+                </resources>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -155,11 +170,80 @@
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
                             <forceJavacCompilerUse>true</forceJavacCompilerUse>
-                            <compilerArgs>
-                                <arg>-h</arg>
-                                <arg>${project.basedir}/src/main/native/native-include</arg>
-                            </compilerArgs>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <id>generate-jni-files</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                                    <compilerArgs>
+                                        <arg>-h</arg>
+                                        <arg>${project.basedir}/src/main/native/native-include</arg>
+                                    </compilerArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-native-library</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.build.directory}/native/build</directory>
+                                            <includes>
+                                                <include>libjsensors.so</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-native-library</id>
+                                <phase>compile</phase>
+                                <configuration>
+                                    <failOnError>true</failOnError>
+                                    <target>
+                                        <exec executable="/bin/bash" dir="${project.build.directory}/native" failonerror="true">
+                                            <arg value="${project.build.directory}/native/build.sh"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -225,6 +309,7 @@
                         <configuration>
                             <buildArgs>
                                 <buildArg>-H:+AddAllCharsets</buildArg>
+                                <buildArg>-H:ReflectionConfigurationFiles=${project.build.directory}/reflection-config.json</buildArg>
                                 <buildArg>--initialize-at-build-time=ch.qos.logback</buildArg>
                             </buildArgs>
                             <metadataRepository>

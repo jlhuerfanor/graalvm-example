@@ -1,8 +1,8 @@
-package org.example.sensemon.application.adapter.primary.rest;
+package org.example.sensemon.adapter.rest;
 
-import org.example.sensemon.application.adapter.primary.rest.dto.DeviceInfoDto;
-import org.example.sensemon.application.adapter.primary.rest.dto.FeatureInfoDto;
-import org.example.sensemon.application.adapter.primary.rest.dto.SubFeatureInfoDto;
+import org.example.sensemon.adapter.rest.dto.DeviceInfoDto;
+import org.example.sensemon.adapter.rest.dto.FeatureInfoDto;
+import org.example.sensemon.adapter.rest.dto.SubFeatureInfoDto;
 import org.springframework.hateoas.Link;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 

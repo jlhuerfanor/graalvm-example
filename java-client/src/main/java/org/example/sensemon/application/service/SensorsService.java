@@ -1,10 +1,7 @@
 package org.example.sensemon.application.service;
 
-import org.example.sensemon.application.adapter.secondary.SensorMonitor;
-import org.example.sensemon.application.model.DeviceInfo;
-import org.example.sensemon.application.model.FeatureInfo;
-import org.example.sensemon.application.model.SensorData;
-import org.example.sensemon.application.model.SubFeatureInfo;
+import org.example.sensemon.adapter.SensorMonitor;
+import org.example.sensemon.application.model.*;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -60,6 +57,12 @@ public class SensorsService {
                 .orElse(Collections.emptyList());
     }
 
+    public SensorData getValue(SensorReference sensorReference) {
+        return this.getValue(
+                sensorReference.getDevice(),
+                sensorReference.getFeature(),
+                sensorReference.getSubFeature());
+    }
     public SensorData getValue(String deviceName, String featureName, String subFeatureName) {
         var device = checkDeviceCache().get(deviceName);
         var feature = checkFeatureCache(device).get(featureName);
