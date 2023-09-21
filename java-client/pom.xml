@@ -146,11 +146,10 @@
             <build>
                 <resources>
                     <resource>
-                        <directory>${project.basedir}/src/main/native</directory>
-                        <targetPath>${project.build.directory}/native</targetPath>
-                        <excludes>
-                            <exclude>**/build/**/*</exclude>
-                        </excludes>
+                        <directory>${project.build.directory}/native/build</directory>
+                        <includes>
+                            <include>libjsensors.so</include>
+                        </includes>
                     </resource>
                 </resources>
                 <plugins>
@@ -193,18 +192,19 @@
                         <artifactId>maven-resources-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>copy-native-library</id>
-                                <phase>install</phase>
+                                <id>setup-native-library</id>
+                                <phase>generate-sources</phase>
                                 <goals>
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
                                     <resources>
                                         <resource>
-                                            <directory>${project.build.directory}/native/build</directory>
-                                            <includes>
-                                                <include>libjsensors.so</include>
-                                            </includes>
+                                            <directory>${project.basedir}/src/main/native</directory>
+                                            <targetPath>${project.build.directory}/native</targetPath>
+                                            <excludes>
+                                                <exclude>**/build/**/*</exclude>
+                                            </excludes>
                                         </resource>
                                     </resources>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
@@ -218,7 +218,7 @@
                         <executions>
                             <execution>
                                 <id>compile-native-library</id>
-                                <phase>compile</phase>
+                                <phase>process-sources</phase>
                                 <configuration>
                                     <failOnError>true</failOnError>
                                     <target>

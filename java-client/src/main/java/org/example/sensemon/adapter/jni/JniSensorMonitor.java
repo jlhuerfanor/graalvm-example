@@ -10,22 +10,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class JniSensorMonitor implements SensorMonitor, AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(JniSensorMonitor.class);
-    private static final String JSENSORS_LIBRARY_PATH = "jsensors.library-path";
+    private static final String RESOURCE_LIBJSENSORS_SO = "/libjsensors.so";
 
     static {
-        log.info("Loading native library...");
+        log.info("Loading JNI native library...");
+        try(var library = Objects.requireNonNull(JniSensorMonitor.class.getResourceAsStream(RESOURCE_LIBJSENSORS_SO))) {
+            var target = Files.createTempFile("libsensors.so","");
 
-        Optional.of(JSENSORS_LIBRARY_PATH)
-                .map(System::getProperty)
-                .ifPresentOrElse(
-                        System::load,
-                        () -> { throw new UnsatisfiedLinkError("Unable to load libjsensors. Property jsensors.library-path is not set!"); });
+            Files.copy(library, target, StandardCopyOption.REPLACE_EXISTING);
+            System.load(target.toAbsolutePath().toString());
+        } catch (IOException ex) {
+            log.error("Unable to load libjsensors!", ex);
+            throw new UnsatisfiedLinkError("Unable to load libjsensors!");
+        }
     }
 
     private static boolean sensorsReady = false;
